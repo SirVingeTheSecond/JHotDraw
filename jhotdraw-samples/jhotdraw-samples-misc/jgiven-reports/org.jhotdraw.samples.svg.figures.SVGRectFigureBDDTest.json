@@ -1,0 +1,229 @@
+{
+  "className": "org.jhotdraw.samples.svg.figures.SVGRectFigureBDDTest",
+  "name": "SVG Rect Figure BDD",
+  "scenarios": [
+    {
+      "className": "org.jhotdraw.samples.svg.figures.SVGRectFigureBDDTest",
+      "testMethodName": "rectangle_moves_correctly_after_translation",
+      "description": "rectangle moves correctly after translation",
+      "tagIds": [],
+      "explicitParameters": [],
+      "derivedParameters": [],
+      "scenarioCases": [
+        {
+          "caseNr": 1,
+          "steps": [
+            {
+              "name": "a new rectangle",
+              "words": [
+                {
+                  "value": "Given",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "a new rectangle"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 101826600,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "transform by translation",
+              "words": [
+                {
+                  "value": "When",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "transform by translation"
+                },
+                {
+                  "value": "10.0",
+                  "argumentInfo": {
+                    "argumentName": "dx",
+                    "formattedValue": "10.0"
+                  }
+                },
+                {
+                  "value": "10.0",
+                  "argumentInfo": {
+                    "argumentName": "dy",
+                    "formattedValue": "10.0"
+                  }
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 5165500,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "the bounds are",
+              "words": [
+                {
+                  "value": "Then",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the bounds are"
+                },
+                {
+                  "value": "20.0",
+                  "argumentInfo": {
+                    "argumentName": "x",
+                    "formattedValue": "20.0"
+                  }
+                },
+                {
+                  "value": "30.0",
+                  "argumentInfo": {
+                    "argumentName": "y",
+                    "formattedValue": "30.0"
+                  }
+                },
+                {
+                  "value": "100.0",
+                  "argumentInfo": {
+                    "argumentName": "width",
+                    "formattedValue": "100.0"
+                  }
+                },
+                {
+                  "value": "50.0",
+                  "argumentInfo": {
+                    "argumentName": "height",
+                    "formattedValue": "50.0"
+                  }
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 478000,
+              "depth": 0,
+              "parentFailed": false
+            }
+          ],
+          "explicitArguments": [],
+          "derivedArguments": [],
+          "status": "SUCCESS",
+          "durationInNanos": 124618600
+        }
+      ],
+      "casesAsTable": false,
+      "durationInNanos": 124618600
+    },
+    {
+      "className": "org.jhotdraw.samples.svg.figures.SVGRectFigureBDDTest",
+      "testMethodName": "rectangle_bounds_update_correctly_when_setBounds_called",
+      "description": "rectangle bounds update correctly when setBounds called",
+      "tagIds": [],
+      "explicitParameters": [],
+      "derivedParameters": [],
+      "scenarioCases": [
+        {
+          "caseNr": 1,
+          "steps": [
+            {
+              "name": "a new rectangle",
+              "words": [
+                {
+                  "value": "Given",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "a new rectangle"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 65000,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "set bounds",
+              "words": [
+                {
+                  "value": "When",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "set bounds"
+                },
+                {
+                  "value": "Point2D.Double[5.0, 5.0]",
+                  "argumentInfo": {
+                    "argumentName": "anchor",
+                    "formattedValue": "Point2D.Double[5.0, 5.0]"
+                  }
+                },
+                {
+                  "value": "Point2D.Double[50.0, 30.0]",
+                  "argumentInfo": {
+                    "argumentName": "lead",
+                    "formattedValue": "Point2D.Double[50.0, 30.0]"
+                  }
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 1651000,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "the bounds are",
+              "words": [
+                {
+                  "value": "Then",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the bounds are"
+                },
+                {
+                  "value": "5.0",
+                  "argumentInfo": {
+                    "argumentName": "x",
+                    "formattedValue": "5.0"
+                  }
+                },
+                {
+                  "value": "5.0",
+                  "argumentInfo": {
+                    "argumentName": "y",
+                    "formattedValue": "5.0"
+                  }
+                },
+                {
+                  "value": "45.0",
+                  "argumentInfo": {
+                    "argumentName": "width",
+                    "formattedValue": "45.0"
+                  }
+                },
+                {
+                  "value": "25.0",
+                  "argumentInfo": {
+                    "argumentName": "height",
+                    "formattedValue": "25.0"
+                  }
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 423500,
+              "depth": 0,
+              "parentFailed": false
+            }
+          ],
+          "explicitArguments": [],
+          "derivedArguments": [],
+          "status": "SUCCESS",
+          "durationInNanos": 3039900
+        }
+      ],
+      "casesAsTable": false,
+      "durationInNanos": 3039900
+    }
+  ],
+  "tagMap": {}
+}
