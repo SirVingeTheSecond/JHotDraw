@@ -45,7 +45,8 @@ public class BezierToolSwingAcceptanceTest extends AssertJSwingJUnitTestCase {
             }
         }).withTimeout(10000).using(robot());
 
-        window.maximize();
+        // The reason for a fixed window size is that Xvfb does not support window maximization.
+        window.resizeTo(new Dimension(800, 600));
         robot().waitForIdle();
 
         pause(500);
