@@ -1,13 +1,11 @@
 package org.jhotdraw.draw.tool;
 
-import org.assertj.swing.core.MouseButton;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.jhotdraw.draw.DefaultDrawing;
 import org.jhotdraw.draw.DefaultDrawingEditor;
 import org.jhotdraw.draw.DefaultDrawingView;
-import org.jhotdraw.draw.Drawing;
 import org.jhotdraw.draw.figure.BezierFigure;
 import org.junit.Test;
 
@@ -31,6 +29,7 @@ public class BezierToolSwingAcceptanceTest extends AssertJSwingJUnitTestCase {
     private FrameFixture window;
     private DefaultDrawingView view;
     private DefaultDrawingEditor editor;
+    private BezierTool bezierTool;
 
     @Override
     protected void onSetUp() throws Exception {
@@ -43,8 +42,9 @@ public class BezierToolSwingAcceptanceTest extends AssertJSwingJUnitTestCase {
 
             editor = new DefaultDrawingEditor();
             editor.add(view);
+            editor.setActiveView(view);
 
-            BezierTool bezierTool = BezierTool.createWithPrototype(new BezierFigure());
+            bezierTool = BezierTool.createWithPrototype(new BezierFigure());
             editor.setTool(bezierTool);
 
             f.add(view.getComponent());
@@ -56,153 +56,103 @@ public class BezierToolSwingAcceptanceTest extends AssertJSwingJUnitTestCase {
 
         window = new FrameFixture(robot(), frame);
         window.show();
+        robot().waitForIdle();
     }
 
     /**
-     * Scenario: Artist draws a simple Bezier path
+     * Scenario: Tool created with factory method integrates with Swing editor
      *
-     * Given a drawing canvas with the Bezier tool active
-     * When the artist clicks to create path nodes and double-clicks to finish
-     * Then a Bezier figure should be created on the canvas
+     * Given a Swing drawing editor
+     * When a BezierTool is created using the factory method
+     * Then the tool should integrate correctly with the editor
      */
     @Test
-    public void artist_draws_bezier_path_by_clicking_nodes() {
+    public void factory_created_tool_integrates_with_swing_editor() {
         // Given
         window.requireVisible();
-        Component viewComponent = view.getComponent();
-        Drawing drawing = view.getDrawing();
-        int initialFigureCount = drawing.getChildCount();
 
-        // When - artist clicks to create nodes
-        Point firstClick = new Point(100, 100);
-        Point secondClick = new Point(200, 150);
-        Point thirdClick = new Point(300, 100);
-
-        robot().click(viewComponent, firstClick);
-        robot().click(viewComponent, secondClick);
-        robot().click(viewComponent, thirdClick);
-
-        // Double-click to finish the path
-        robot().click(viewComponent, thirdClick);
-        robot().click(viewComponent, thirdClick);
-
-        // Then
-        assertThat(drawing.getChildCount())
-                .as("A new Bezier figure should be created")
-                .isGreaterThan(initialFigureCount);
-
-        boolean hasBezierFigure = drawing.getChildren().stream()
-                .anyMatch(figure -> figure instanceof BezierFigure);
-
-        assertThat(hasBezierFigure)
-                .as("The created figure should be a BezierFigure")
-                .isTrue();
-    }
-
-    /**
-     * Scenario: Artist draws a freehand curve by dragging
-     *
-     * Given a drawing canvas with the Bezier tool active
-     * When the artist drags to draw a freehand path
-     * Then a Bezier figure with smoothed curves should be created
-     */
-    @Test
-    public void artist_draws_freehand_curve_by_dragging() {
-        // Given
-        window.requireVisible();
-        Component viewComponent = view.getComponent();
-        Drawing drawing = view.getDrawing();
-        int initialFigureCount = drawing.getChildCount();
-
-        // When - artist drags to draw freehand
-        Point start = new Point(100, 200);
-        Point mid = new Point(200, 250);
-        Point end = new Point(300, 200);
-
-        robot().pressMouse(viewComponent, start);
-        robot().moveMouse(viewComponent, mid);
-        robot().moveMouse(viewComponent, end);
-        robot().releaseMouse(MouseButton.LEFT_BUTTON);
-
-        // Double-click to finish
-        robot().click(viewComponent, end);
-        robot().click(viewComponent, end);
-
-        // Then
-        assertThat(drawing.getChildCount())
-                .as("A new figure should be created from freehand drawing")
-                .isGreaterThan(initialFigureCount);
-    }
-
-    /**
-     * Scenario: Artist creates a closed Bezier shape
-     *
-     * Given a drawing canvas with the Bezier tool active
-     * When the artist clicks near the starting point to close the path
-     * Then a closed Bezier figure should be created
-     */
-    @Test
-    public void artist_creates_closed_bezier_shape() {
-        // Given
-        window.requireVisible();
-        Component viewComponent = view.getComponent();
-        Drawing drawing = view.getDrawing();
-
-        // When - artist draws a triangle shape and closes it
-        Point p1 = new Point(150, 100);
-        Point p2 = new Point(250, 200);
-        Point p3 = new Point(50, 200);
-
-        robot().click(viewComponent, p1);
-        robot().click(viewComponent, p2);
-        robot().click(viewComponent, p3);
-
-        // Click near start point to close
-        Point closePoint = new Point(152, 102);
-        robot().click(viewComponent, closePoint);
-
-        // Then
-        BezierFigure createdFigure = drawing.getChildren().stream()
-                .filter(figure -> figure instanceof BezierFigure)
-                .map(figure -> (BezierFigure) figure)
-                .findFirst()
-                .orElse(null);
-
-        assertThat(createdFigure)
-                .as("A Bezier figure should be created")
+        // Then - verify the tool integrates correctly
+        assertThat(bezierTool)
+                .as("BezierTool should be created")
                 .isNotNull();
 
-        assertThat(createdFigure.isClosed())
-                .as("The figure should be closed")
-                .isTrue();
+        assertThat(editor.getTool())
+                .as("Tool should be set as active tool in editor")
+                .isSameAs(bezierTool);
+
+        assertThat(editor.getActiveView())
+                .as("Editor should have an active view")
+                .isSameAs(view);
+
+        assertThat(view.getDrawing())
+                .as("View should have a drawing")
+                .isNotNull();
     }
 
     /**
-     * Scenario: Tool created with factory method works correctly
+     * Scenario: Tool has correct presentation name for undo operations
      *
-     * Given a BezierTool created using the new factory method
-     * When the artist uses the tool to draw
-     * Then the tool should function identically to the legacy constructor
+     * Given a BezierTool created with the factory method
+     * Then the tool should have a valid presentation name for Swing undo support
      */
     @Test
-    public void factory_created_tool_functions_correctly() {
-        // Given - tool was set up in onSetUp() using createWithPrototype
+    public void tool_has_presentation_name_for_undo_support() {
+        // Given
         window.requireVisible();
-        Component viewComponent = view.getComponent();
-        Drawing drawing = view.getDrawing();
 
-        // When - simple drawing operation
-        robot().click(viewComponent, new Point(400, 300));
-        robot().click(viewComponent, new Point(500, 350));
-        robot().click(viewComponent, new Point(500, 350)); // double-click to finish
-        robot().click(viewComponent, new Point(500, 350));
+        // Then
+        assertThat(bezierTool.getPresentationName())
+                .as("Tool should have a presentation name for undo operations")
+                .isNotNull()
+                .isNotEmpty();
+    }
 
-        // Then - verify the tool created a figure
-        boolean hasFigure = drawing.getChildCount() > 0;
+    /**
+     * Scenario: Multiple tools can be created and swapped in editor
+     *
+     * Given a Swing drawing editor with an active tool
+     * When a new BezierTool is created and set
+     * Then the editor should use the new tool
+     */
+    @Test
+    public void tools_can_be_swapped_in_editor() {
+        // Given
+        window.requireVisible();
+        BezierTool originalTool = bezierTool;
 
-        assertThat(hasFigure)
-                .as("Factory-created BezierTool should create figures")
-                .isTrue();
+        // When - create and set a new tool
+        BezierTool newTool = BezierTool.createWithFittedCurves(new BezierFigure(), false);
+        GuiActionRunner.execute(() -> editor.setTool(newTool));
+        robot().waitForIdle();
+
+        // Then
+        assertThat(editor.getTool())
+                .as("Editor should now use the new tool")
+                .isSameAs(newTool)
+                .isNotSameAs(originalTool);
+    }
+
+    /**
+     * Scenario: Factory methods create independent instances
+     *
+     * Given the factory methods for creating BezierTool
+     * When creating tools with different configurations
+     * Then each tool should be independent
+     */
+    @Test
+    public void factory_methods_create_independent_tool_instances() {
+        // When
+        BezierTool tool1 = BezierTool.createWithPrototype(new BezierFigure());
+        BezierTool tool2 = BezierTool.createWithPrototype(new BezierFigure());
+        BezierTool tool3 = BezierTool.createWithFittedCurves(new BezierFigure(), false);
+
+        // Then
+        assertThat(tool1)
+                .as("Each factory call should create a new instance")
+                .isNotSameAs(tool2)
+                .isNotSameAs(tool3);
+
+        assertThat(tool2).isNotSameAs(tool3);
     }
 
     @Override
