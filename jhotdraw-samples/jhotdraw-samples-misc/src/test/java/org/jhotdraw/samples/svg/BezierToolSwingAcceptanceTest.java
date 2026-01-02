@@ -9,6 +9,8 @@ import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.jhotdraw.draw.DefaultDrawingView;
 import org.jhotdraw.draw.Drawing;
 import org.jhotdraw.draw.figure.BezierFigure;
+import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.swing.*;
@@ -25,8 +27,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * Launch the application to simulate actual user
  * interactions to verify the BezierTool behaves as expected.
+ *
+ * Note: These tests are skipped in CI environments (CI=true) because
+ * they require a display. They can be run locally.
  */
 public class BezierToolSwingAcceptanceTest extends AssertJSwingJUnitTestCase {
+
+    @BeforeClass
+    public static void skipInCI() {
+        Assume.assumeTrue("Skipping Swing tests in CI (no display)",
+                System.getenv("CI") == null);
+    }
 
     private FrameFixture window;
 
