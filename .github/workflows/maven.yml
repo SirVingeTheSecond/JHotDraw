@@ -27,8 +27,15 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build with Maven (with Xvfb for GUI tests)
-        run: xvfb-run --auto-servernum mvn -B package --file pom.xml
+      - name: Start Xvfb
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 &
+          sleep 2
+
+      - name: Build with Maven
+        env:
+          DISPLAY: :99
+        run: mvn -B package --file pom.xml
 
       - name: Deploy to Github Package Registry
         env:
