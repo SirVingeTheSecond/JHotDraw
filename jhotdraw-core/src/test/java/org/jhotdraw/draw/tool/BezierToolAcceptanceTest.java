@@ -19,11 +19,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * BDD acceptance tests for BezierTool creation.
  *
- * These scenarios map to the Change Request user story:
- * "As an artist, I want to draw smooth Bezier curves so that I can create
- * comprehensive vector illustrations."
+ * These scenarios verify the User Story from Lab 01:
  *
- * The tests use JGiven for Given-When-Then structure and AssertJ for assertions.
+ * <p> "As a developer maintaining JHotDraw, I want to improve the BezierTool code
+ * so that it is easier to understand, test, and modify." </p>
+ *
+ * <p> The tests verify that the refactored factory methods and configuration work
+ * correctly. Each scenario is a different aspect of the improved instantiation
+ * implementation introduced by the refactoring. </p>
+ *
+ * <p> The tests use JGiven for Given-When-Then structure and AssertJ for assertions. </p>
  */
 @ExtendWith(JGivenExtension.class)
 @DisplayName("Bezier tool creation")

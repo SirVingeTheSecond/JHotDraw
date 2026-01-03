@@ -21,15 +21,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Acceptance test for BezierTool using AssertJ-Swing.
  *
- * User Story:
- * As an artist, I want to draw smooth Bezier curves so that I can create
- * professional vector illustrations.
+ * <p> These tests verify that the refactoring work preserves the behavior defined in the Epic.
+ * The Epic from Lab 01 describes the Bezier Tool's functionality: </p>
  *
- * Launch the application to simulate actual user
- * interactions to verify the BezierTool behaves as expected.
+ * <p> Draw, Edit, Even-Odd, Close Path, Scribble, and Polygon. </p>
  *
- * Note: These tests are skipped in CI environments (CI=true) because
- * they require a display. They can be run locally.
+ * <p> By simulating actual user interactions through the UI,
+ * these tests confirm that the refactored code continues to function correctly from the
+ * end user's perspective. </p>
+ *
+ * <p> Note: These tests are skipped in CI environments (CI=true) because
+ * they require a display. They can be run locally. </p>
  */
 public class BezierToolSwingAcceptanceTest extends AssertJSwingJUnitTestCase {
 
