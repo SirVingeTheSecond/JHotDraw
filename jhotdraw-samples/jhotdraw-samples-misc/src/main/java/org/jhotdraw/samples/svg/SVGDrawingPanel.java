@@ -73,35 +73,6 @@ public class SVGDrawingPanel extends JPanel implements Disposable {
         return undoManager;
     }
 
-    public void setUndoRedoManager(UndoRedoManager undo) {
-        if (undoManager != null && getView().getDrawing() != null) {
-            getView().getDrawing().removeUndoableEditListener(undoManager);
-        }
-        undoManager = undo;
-        if (undoManager != null && getView().getDrawing() != null) {
-            getView().getDrawing().addUndoableEditListener(undoManager);
-        }
-    }
-
-    private class ItemChangeHandler implements ItemListener {
-
-        private JToolBar toolbar;
-        private String prefkey;
-
-        public ItemChangeHandler(JToolBar toolbar, String prefkey) {
-            this.toolbar = toolbar;
-            this.prefkey = prefkey;
-        }
-
-        @Override
-        public void itemStateChanged(ItemEvent e) {
-            boolean b = e.getStateChange() == ItemEvent.SELECTED;
-            toolbar.setVisible(b);
-            prefs.putBoolean(prefkey, b);
-            validate();
-        }
-    }
-
     /**
      * Creates new instance.
      */

@@ -46,7 +46,10 @@ public class CanvasToolBar extends AbstractToolBar {
     private static final String CANVAS_WIDTH_TOOL_TIP_TEXT = "attribute.canvasWidth.toolTipText";
     private static final String CANVAS_HEIGHT_TOOL_TIP_TEXT = "attribute.canvasHeight.toolTipText";
     private static final String CANVAS_FILL_COLOR = "attribute.canvasFillColor";
+    private static final String CANVAS_FILL_COLOR_TOOL_TIP_TEXT = "attribute.canvasFillColor.toolTipText";
     private static final String CANVAS_FILL_OPACITY = "attribute.canvasFillOpacity";
+    private static final String CANVAS_FIGURE_OPACITY_TOOL_TIP_TEXT = "attribute.figureOpacity.toolTipText";
+    private static final String CANVAS_FILL_OPACITY_ICON = "attribute.canvasFillOpacity.icon";
 
     /**
      * Creates new instance.
@@ -103,7 +106,7 @@ public class CanvasToolBar extends AbstractToolBar {
             labels.configureToolBarButton(opacityPopupButton, CANVAS_FILL_OPACITY);
             opacityPopupButton.setUI((PaletteButtonUI) PaletteButtonUI.createUI(opacityPopupButton));
             opacityPopupButton.setIcon(
-                    new DrawingOpacityIcon(editor, AttributeKeys.CANVAS_FILL_OPACITY, AttributeKeys.CANVAS_FILL_COLOR, null, Images.createImage(getClass(), labels.getString(CANVAS_FILL_OPACITY.concat(".icon"))),
+                    new DrawingOpacityIcon(editor, AttributeKeys.CANVAS_FILL_OPACITY, AttributeKeys.CANVAS_FILL_COLOR, null, Images.createImage(getClass(), labels.getString(CANVAS_FILL_OPACITY_ICON)),
                             new Rectangle(5, 5, 6, 6), new Rectangle(4, 4, 7, 7)));
             disposables.add(new DrawingComponentRepainter(editor, opacityPopupButton));
             gbc = new GridBagConstraints();
@@ -193,7 +196,7 @@ public class CanvasToolBar extends AbstractToolBar {
             // Fill color field with button
             JAttributeTextField<Color> colorField = new JAttributeTextField<Color>();
             colorField.setColumns(7);
-            colorField.setToolTipText(labels.getString(CANVAS_FILL_COLOR.concat(".toolTipText")));
+            colorField.setToolTipText(labels.getString(CANVAS_FILL_COLOR_TOOL_TIP_TEXT));
             colorField.putClientProperty("Palette.Component.segmentPosition", "first");
             colorField.setUI((PaletteFormattedTextFieldUI) PaletteFormattedTextFieldUI.createUI(colorField));
             colorField.setFormatterFactory(ColorFormatter.createFormatterFactory());
@@ -216,7 +219,7 @@ public class CanvasToolBar extends AbstractToolBar {
             // Opacity field with slider
             JAttributeTextField<Double> opacityField = new JAttributeTextField<Double>();
             opacityField.setColumns(4);
-            opacityField.setToolTipText(labels.getString("attribute.figureOpacity.toolTipText"));
+            opacityField.setToolTipText(labels.getString(CANVAS_FIGURE_OPACITY_TOOL_TIP_TEXT));
             opacityField.setHorizontalAlignment(JAttributeTextField.RIGHT);
             opacityField.putClientProperty("Palette.Component.segmentPosition", "first");
             opacityField.setUI((PaletteFormattedTextFieldUI) PaletteFormattedTextFieldUI.createUI(opacityField));
@@ -241,7 +244,7 @@ public class CanvasToolBar extends AbstractToolBar {
             labels.configureToolBarButton(opacityPopupButton, CANVAS_FILL_OPACITY);
             opacityPopupButton.setUI((PaletteButtonUI) PaletteButtonUI.createUI(opacityPopupButton));
             opacityPopupButton.setIcon(
-                    new DrawingOpacityIcon(editor, AttributeKeys.CANVAS_FILL_OPACITY, AttributeKeys.CANVAS_FILL_COLOR, null, Images.createImage(getClass(), labels.getString(CANVAS_FILL_OPACITY.concat(".icon"))),
+                    new DrawingOpacityIcon(editor, AttributeKeys.CANVAS_FILL_OPACITY, AttributeKeys.CANVAS_FILL_COLOR, null, Images.createImage(getClass(), labels.getString(CANVAS_FILL_OPACITY_ICON)),
                             new Rectangle(5, 5, 6, 6), new Rectangle(4, 4, 7, 7)));
             disposables.add(new DrawingComponentRepainter(editor, opacityPopupButton));
             gbc = new GridBagConstraints();
