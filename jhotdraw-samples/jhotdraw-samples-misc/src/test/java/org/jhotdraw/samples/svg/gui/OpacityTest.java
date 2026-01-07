@@ -69,7 +69,7 @@ public class OpacityTest {
         assertNotNull(component);
 
         JAttributeSlider slider = findOpacitySlider(component);
-        assertNotNull("Opacity slider exists", slider);
+        assertNotNull("Opacity slider does not exists", slider);
     }
 
     @Test
