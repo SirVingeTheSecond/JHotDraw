@@ -9,20 +9,23 @@ package org.jhotdraw.samples.svg.figures;
 
 import org.jhotdraw.draw.figure.AbstractAttributedFigure;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
 import java.awt.geom.*;
-import java.awt.image.*;
-import java.util.*;
-import javax.swing.*;
-import org.jhotdraw.draw.*;
-import static org.jhotdraw.draw.AttributeKeys.STROKE_WIDTH;
-import static org.jhotdraw.draw.AttributeKeys.TRANSFORM;
+import java.awt.image.BufferedImage;
+import java.util.Collection;
+import java.util.LinkedList;
+import javax.swing.Action;
+import javax.swing.AbstractAction;
+import org.jhotdraw.draw.AttributeKey;
+import org.jhotdraw.draw.AttributeKeys;
+import static org.jhotdraw.draw.AttributeKeys.*;
 import org.jhotdraw.samples.svg.SVGAttributeKeys;
 import static org.jhotdraw.samples.svg.SVGAttributeKeys.*;
-import org.jhotdraw.util.*;
+import org.jhotdraw.util.ResourceBundleUtil;
 
 /**
- * SVGAttributedFigure.
+ * Base class for SVG figures. Provides opacity compositing, applies TRANSFORM,
+ * and delegates fill/stroke rendering to subclasses.
  *
  * @author Werner Randelshofer
  * @version $Id$
@@ -41,65 +44,135 @@ public abstract class SVGAttributedFigure extends AbstractAttributedFigure {
     public void draw(Graphics2D g) {
         double opacity = get(OPACITY);
         opacity = Math.min(Math.max(0d, opacity), 1d);
-        if (opacity != 0d) {
-            if (opacity != 1d) {
-                Rectangle2D.Double drawingArea = getDrawingArea();
-                Rectangle2D clipBounds = g.getClipBounds();
-                if (clipBounds != null) {
-                    Rectangle2D.intersect(drawingArea, clipBounds, drawingArea);
-                }
-                if (!drawingArea.isEmpty()) {
-                    BufferedImage buf = new BufferedImage(
-                            Math.max(1, (int) ((2 + drawingArea.width) * g.getTransform().getScaleX())),
-                            Math.max(1, (int) ((2 + drawingArea.height) * g.getTransform().getScaleY())),
-                            BufferedImage.TYPE_INT_ARGB);
-                    Graphics2D gr = buf.createGraphics();
-                    gr.scale(g.getTransform().getScaleX(), g.getTransform().getScaleY());
-                    gr.translate((int) -drawingArea.x, (int) -drawingArea.y);
-                    gr.setRenderingHints(g.getRenderingHints());
-                    drawFigure(gr);
-                    gr.dispose();
-                    Composite savedComposite = g.getComposite();
-                    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) opacity));
-                    g.drawImage(buf, (int) drawingArea.x, (int) drawingArea.y,
-                            2 + (int) drawingArea.width, 2 + (int) drawingArea.height, null);
-                    g.setComposite(savedComposite);
-                }
-            } else {
-                drawFigure(g);
-            }
+
+        if (opacity == 0d) {
+            return;
+        }
+
+        if (opacity == 1d) {
+            drawFigure(g);
+            return;
+        }
+
+        // For partial opacity, render figure into an off-screen image and composite.
+        Rectangle2D.Double drawingArea = getDrawingArea();
+        Rectangle2D clipBounds = g.getClipBounds();
+        if (clipBounds != null) {
+            Rectangle2D.intersect(drawingArea, clipBounds, drawingArea);
+        }
+        if (drawingArea.isEmpty()) {
+            return;
+        }
+
+        // Determine device scale (assume uniform scale typical for views; still handle non-uniform safely).
+        AffineTransform deviceTx = g.getTransform();
+        double sx = Math.abs(deviceTx.getScaleX());
+        double sy = Math.abs(deviceTx.getScaleY());
+        if (sx == 0d) sx = 1d;
+        if (sy == 0d) sy = 1d;
+
+        // Add a small margin to avoid clipping due to rounding.
+        final double margin = 2d;
+
+        int pixelW = (int) Math.ceil((drawingArea.getWidth() + margin) * sx);
+        int pixelH = (int) Math.ceil((drawingArea.getHeight() + margin) * sy);
+
+        // Ensure we always allocate a valid image.
+        pixelW = Math.max(1, pixelW);
+        pixelH = Math.max(1, pixelH);
+
+        BufferedImage buf = new BufferedImage(pixelW, pixelH, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D gr = buf.createGraphics();
+        try {
+            gr.setRenderingHints(g.getRenderingHints());
+
+            // Map drawingArea in user space into the buffer with device scaling.
+            gr.scale(sx, sy);
+            gr.translate(-drawingArea.getX(), -drawingArea.getY());
+
+            // Important: drawFigure expects a Graphics2D in user coordinates.
+            drawFigure(gr);
+
+        } finally {
+            gr.dispose();
+        }
+
+        Composite savedComposite = g.getComposite();
+        try {
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) opacity));
+
+            // Draw the buffer back into the original graphics in user coordinates.
+            // Use the exact drawingArea location; width/height in user space.
+            g.drawImage(
+                    buf,
+                    (int) Math.floor(drawingArea.getX()),
+                    (int) Math.floor(drawingArea.getY()),
+                    (int) Math.ceil(drawingArea.getWidth() + margin),
+                    (int) Math.ceil(drawingArea.getHeight() + margin),
+                    null
+            );
+        } finally {
+            g.setComposite(savedComposite);
         }
     }
 
     /**
-     * This method is invoked before the rendered image of the figure is
-     * composited.
+     * Draws the figure using current attributes.
+     * This method is invoked before the rendered image is composited for opacity.
      */
     public void drawFigure(Graphics2D g) {
         AffineTransform savedTransform = null;
-        if (get(TRANSFORM) != null) {
+
+        AffineTransform tx = get(TRANSFORM);
+        if (tx != null) {
             savedTransform = g.getTransform();
-            g.transform(get(TRANSFORM));
+            g.transform(tx);
         }
-        Paint paint = SVGAttributeKeys.getFillPaint(this);
-        if (paint != null) {
-            g.setPaint(paint);
+
+        // Fill
+        Paint fillPaint = SVGAttributeKeys.getFillPaint(this);
+        if (fillPaint != null) {
+            g.setPaint(fillPaint);
             drawFill(g);
         }
-        paint = SVGAttributeKeys.getStrokePaint(this);
-        if (paint != null && get(STROKE_WIDTH) > 0) {
-            g.setPaint(paint);
+
+        // Stroke
+        Paint strokePaint = SVGAttributeKeys.getStrokePaint(this);
+        if (strokePaint != null && get(STROKE_WIDTH) > 0d) {
+            g.setPaint(strokePaint);
             g.setStroke(SVGAttributeKeys.getStroke(this, 1.0));
             drawStroke(g);
         }
-        if (get(TRANSFORM) != null) {
+
+        if (tx != null) {
             g.setTransform(savedTransform);
         }
     }
 
+    /**
+     * Invalidate cached geometry in subclasses when attributes affecting rendering or
+     * coordinate mapping change.
+     */
     @Override
     public <T> void set(AttributeKey<T> key, T newValue) {
-        if (key == TRANSFORM) {
+        boolean affectsTransform = key == TRANSFORM;
+
+        boolean affectsOpacity = key == OPACITY;
+
+        boolean affectsPaintOrStroke =
+                key == FILL_COLOR
+                        || key == FILL_GRADIENT
+                        || key == STROKE_COLOR
+                        || key == STROKE_GRADIENT
+                        || key == STROKE_WIDTH
+                        || key == STROKE_CAP
+                        || key == STROKE_JOIN
+                        || key == STROKE_MITER_LIMIT
+                        || key == STROKE_DASHES
+                        || key == STROKE_DASH_PHASE
+                        || key == STROKE_TYPE;
+
+        if (affectsTransform || affectsOpacity || affectsPaintOrStroke) {
             invalidate();
         }
         super.set(key, newValue);

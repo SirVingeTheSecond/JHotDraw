@@ -11,8 +11,9 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.util.*;
 import org.jhotdraw.draw.*;
-import static org.jhotdraw.draw.AttributeKeys.FILL_COLOR;
-import static org.jhotdraw.draw.AttributeKeys.TRANSFORM;
+import org.jhotdraw.draw.connector.Connector;
+import org.jhotdraw.draw.figure.ConnectionFigure;
+import static org.jhotdraw.draw.AttributeKeys.*;
 import org.jhotdraw.draw.handle.BoundsOutlineHandle;
 import org.jhotdraw.draw.handle.Handle;
 import org.jhotdraw.draw.handle.ResizeHandleKit;
@@ -24,7 +25,7 @@ import org.jhotdraw.samples.svg.SVGAttributeKeys;
 import static org.jhotdraw.samples.svg.SVGAttributeKeys.*;
 
 /**
- * SVGEllipse represents a SVG ellipse and a SVG circle element.
+ * SVGEllipseFigure represents a SVG ellipse and a SVG circle element.
  *
  * @author Werner Randelshofer
  * @version $Id$
@@ -32,13 +33,17 @@ import static org.jhotdraw.samples.svg.SVGAttributeKeys.*;
 public class SVGEllipseFigure extends SVGAttributedFigure implements SVGFigure {
 
     private static final long serialVersionUID = 1L;
+
     private Ellipse2D.Double ellipse;
+
     /**
-     * This is used to perform faster drawing and hit testing.
+     * Cached transformed shape (geometry + TRANSFORM).
+     * Used to speed up drawing-area computation and hit-testing.
      */
     private transient Shape cachedTransformedShape;
+
     /**
-     * This is used to perform faster hit testing.
+     * Cached hit shape (stroke-inflated outline, depending on fill/stroke settings).
      */
     private transient Shape cachedHitShape;
 
@@ -95,15 +100,23 @@ public class SVGEllipseFigure extends SVGAttributedFigure implements SVGFigure {
     @Override
     public Rectangle2D.Double getDrawingArea() {
         Rectangle2D rx = getTransformedShape().getBounds2D();
-        Rectangle2D.Double r = (rx instanceof Rectangle2D.Double) ? (Rectangle2D.Double) rx : new Rectangle2D.Double(rx.getX(), rx.getY(), rx.getWidth(), rx.getHeight());
-        if (get(TRANSFORM) == null) {
-            double g = SVGAttributeKeys.getPerpendicularHitGrowth(this, 1.0) * 2d + 1;
+        Rectangle2D.Double r = (rx instanceof Rectangle2D.Double)
+                ? (Rectangle2D.Double) rx
+                : new Rectangle2D.Double(rx.getX(), rx.getY(), rx.getWidth(), rx.getHeight());
+
+        AffineTransform tx = get(TRANSFORM);
+        if (tx == null) {
+            double g = SVGAttributeKeys.getPerpendicularHitGrowth(this, 1.0) * 2d + 1d;
             Geom.grow(r, g, g);
         } else {
             double strokeTotalWidth = AttributeKeys.getStrokeTotalWidth(this, 1.0);
-            double width = strokeTotalWidth / 2d;
-            width *= Math.max(get(TRANSFORM).getScaleX(), get(TRANSFORM).getScaleY()) + 1;
-            Geom.grow(r, width, width);
+            double w = strokeTotalWidth / 2d;
+
+            // Apply transform scale properly, then add a small safety margin.
+            w *= Math.max(tx.getScaleX(), tx.getScaleY());
+            w += 1d;
+
+            Geom.grow(r, w, w);
         }
         return r;
     }
@@ -118,23 +131,26 @@ public class SVGEllipseFigure extends SVGAttributedFigure implements SVGFigure {
 
     private Shape getTransformedShape() {
         if (cachedTransformedShape == null) {
-            if (get(TRANSFORM) == null) {
-                cachedTransformedShape = ellipse;
-            } else {
-                cachedTransformedShape = get(TRANSFORM).createTransformedShape(ellipse);
-            }
+            AffineTransform tx = get(TRANSFORM);
+            cachedTransformedShape = (tx == null) ? ellipse : tx.createTransformedShape(ellipse);
         }
         return cachedTransformedShape;
     }
 
     private Shape getHitShape() {
         if (cachedHitShape == null) {
+            Shape ts = getTransformedShape();
+
+            // If the figure is filled (color or gradient), we usually want a "fatter"
+            // hit area based on stroke total width (similar to selection behavior).
             if (get(FILL_COLOR) != null || get(FILL_GRADIENT) != null) {
                 cachedHitShape = new GrowStroke(
-                        (float) SVGAttributeKeys.getStrokeTotalWidth(this, 1.0) / 2f,
-                        (float) SVGAttributeKeys.getStrokeTotalMiterLimit(this, 1.0)).createStrokedShape(getTransformedShape());
+                        (float) (SVGAttributeKeys.getStrokeTotalWidth(this, 1.0) / 2f),
+                        (float) SVGAttributeKeys.getStrokeTotalMiterLimit(this, 1.0)
+                ).createStrokedShape(ts);
             } else {
-                cachedHitShape = SVGAttributeKeys.getHitStroke(this, 1.0).createStrokedShape(getTransformedShape());
+                // If not filled, rely on the SVG hit stroke semantics.
+                cachedHitShape = SVGAttributeKeys.getHitStroke(this, 1.0).createStrokedShape(ts);
             }
         }
         return cachedHitShape;
@@ -156,8 +172,12 @@ public class SVGEllipseFigure extends SVGAttributedFigure implements SVGFigure {
      */
     @Override
     public void transform(AffineTransform tx) {
+        // Keep the original behavior:
+        // - store non-translation transforms in TRANSFORM
+        // - bake pure translations into bounds (fast path)
         if (get(TRANSFORM) != null
                 || (tx.getType() & (AffineTransform.TYPE_TRANSLATION)) != tx.getType()) {
+
             if (get(TRANSFORM) == null) {
                 TRANSFORM.setClone(this, tx);
             } else {
@@ -165,25 +185,27 @@ public class SVGEllipseFigure extends SVGAttributedFigure implements SVGFigure {
                 t.preConcatenate(tx);
                 set(TRANSFORM, t);
             }
+
         } else {
             Point2D.Double anchor = getStartPoint();
             Point2D.Double lead = getEndPoint();
             setBounds(
                     (Point2D.Double) tx.transform(anchor, anchor),
-                    (Point2D.Double) tx.transform(lead, lead));
-            if (get(FILL_GRADIENT) != null
-                    && !get(FILL_GRADIENT).isRelativeToFigureBounds()) {
+                    (Point2D.Double) tx.transform(lead, lead)
+            );
+
+            if (get(FILL_GRADIENT) != null && !get(FILL_GRADIENT).isRelativeToFigureBounds()) {
                 Gradient g = FILL_GRADIENT.getClone(this);
                 g.transform(tx);
                 set(FILL_GRADIENT, g);
             }
-            if (get(STROKE_GRADIENT) != null
-                    && !get(STROKE_GRADIENT).isRelativeToFigureBounds()) {
+            if (get(STROKE_GRADIENT) != null && !get(STROKE_GRADIENT).isRelativeToFigureBounds()) {
                 Gradient g = STROKE_GRADIENT.getClone(this);
                 g.transform(tx);
                 set(STROKE_GRADIENT, g);
             }
         }
+
         invalidate();
     }
 
@@ -200,13 +222,43 @@ public class SVGEllipseFigure extends SVGAttributedFigure implements SVGFigure {
     @Override
     public Object getTransformRestoreData() {
         return new Object[]{
-            ellipse.clone(),
-            TRANSFORM.getClone(this),
-            FILL_GRADIENT.getClone(this),
-            STROKE_GRADIENT.getClone(this)};
+                ellipse.clone(),
+                TRANSFORM.getClone(this),
+                FILL_GRADIENT.getClone(this),
+                STROKE_GRADIENT.getClone(this)
+        };
     }
 
     // ATTRIBUTES
+
+    /**
+     * Invalidate caches when attributes affecting geometry, transform, stroke, fill, or hit testing change.
+     */
+    @Override
+    public <T> void set(AttributeKey<T> key, T newValue) {
+        boolean affectsTransformedShape =
+                key == TRANSFORM;
+
+        boolean affectsHitShape =
+                key == TRANSFORM
+                        || key == FILL_COLOR
+                        || key == FILL_GRADIENT
+                        || key == STROKE_COLOR
+                        || key == STROKE_GRADIENT
+                        || key == STROKE_WIDTH
+                        || key == STROKE_CAP
+                        || key == STROKE_JOIN
+                        || key == STROKE_MITER_LIMIT
+                        || key == STROKE_DASHES
+                        || key == STROKE_DASH_PHASE
+                        || key == STROKE_TYPE;
+
+        if (affectsTransformedShape || affectsHitShape) {
+            invalidate();
+        }
+        super.set(key, newValue);
+    }
+
     // EDITING
     @Override
     public Collection<Handle> createHandles(int detailLevel) {
@@ -229,13 +281,24 @@ public class SVGEllipseFigure extends SVGAttributedFigure implements SVGFigure {
     }
 
     // CONNECTING
-    // COMPOSITE FIGURES
+    @Override
+    public Connector findConnector(Point2D.Double p, ConnectionFigure prototype) {
+        // SVG ellipse typically does not expose connectors in this sample.
+        return null;
+    }
+
+    @Override
+    public Connector findCompatibleConnector(Connector c, boolean isStartConnector) {
+        return null;
+    }
+
     // CLONING
     @Override
     public SVGEllipseFigure clone() {
         SVGEllipseFigure that = (SVGEllipseFigure) super.clone();
         that.ellipse = (Ellipse2D.Double) this.ellipse.clone();
         that.cachedTransformedShape = null;
+        that.cachedHitShape = null;
         return that;
     }
 
