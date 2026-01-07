@@ -49,7 +49,9 @@ public class CanvasToolBar extends AbstractToolBar {
     private static final String CANVAS_FILL_COLOR_TOOL_TIP_TEXT = "attribute.canvasFillColor.toolTipText";
     private static final String CANVAS_FILL_OPACITY = "attribute.canvasFillOpacity";
     private static final String CANVAS_FIGURE_OPACITY_TOOL_TIP_TEXT = "attribute.figureOpacity.toolTipText";
-    private static final String CANVAS_FILL_OPACITY_ICON = "attribute.canvasFillOpacity.icon";
+
+    // change this to fillOpacity.largeIcon because the one it tries to fetch does not exist.
+    private static final String CANVAS_FILL_OPACITY_ICON = "attribute.fillOpacity.largeIcon";
 
     /**
      * Creates new instance.
