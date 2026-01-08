@@ -221,30 +221,28 @@ public class UndoRedoManager extends UndoManager { //javax.swing.undo.UndoManage
      * and of the RedoAction.
      */
     private void updateActions() {
-        String label;
         if (DEBUG) {
             System.out.println("UndoRedoManager@" + hashCode() + ".updateActions "
                     + editToBeUndone()
                     + " canUndo=" + canUndo() + " canRedo=" + canRedo());
         }
-        if (canUndo()) {
-            undoAction.setEnabled(true);
-            label = getUndoPresentationName();
+        updateUndoOrRedoAction(undoAction, labels.getString("edit.undo.text"));
+        updateUndoOrRedoAction(redoAction, labels.getString("edit.redo.text"));
+    }
+
+    private void updateUndoOrRedoAction(AbstractAction undoOrRedoAction, String fallbackLabel) {
+        String label;
+        boolean isActionUndo = (undoOrRedoAction instanceof UndoAction);
+        boolean canUndoOrRedo = isActionUndo ? canUndo() : canRedo();
+        if (canUndoOrRedo) {
+            undoOrRedoAction.setEnabled(true);
+            label = isActionUndo ? getUndoPresentationName() : getRedoPresentationName();
         } else {
-            undoAction.setEnabled(false);
-            label = labels.getString("edit.undo.text");
+            undoOrRedoAction.setEnabled(false);
+            label = fallbackLabel;
         }
-        undoAction.putValue(Action.NAME, label);
-        undoAction.putValue(Action.SHORT_DESCRIPTION, label);
-        if (canRedo()) {
-            redoAction.setEnabled(true);
-            label = getRedoPresentationName();
-        } else {
-            redoAction.setEnabled(false);
-            label = labels.getString("edit.redo.text");
-        }
-        redoAction.putValue(Action.NAME, label);
-        redoAction.putValue(Action.SHORT_DESCRIPTION, label);
+        undoOrRedoAction.putValue(Action.NAME, label);
+        undoOrRedoAction.putValue(Action.SHORT_DESCRIPTION, label);
     }
 
     /**
