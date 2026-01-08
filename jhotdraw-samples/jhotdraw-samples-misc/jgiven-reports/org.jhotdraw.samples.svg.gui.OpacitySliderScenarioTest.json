@@ -1,0 +1,90 @@
+{
+  "className": "org.jhotdraw.samples.svg.gui.OpacitySliderScenarioTest",
+  "name": "Opacity Slider Scenario",
+  "scenarios": [
+    {
+      "className": "org.jhotdraw.samples.svg.gui.OpacitySliderScenarioTest",
+      "testMethodName": "opacity_slider_returns_value",
+      "description": "opacity slider returns value",
+      "tagIds": [],
+      "explicitParameters": [],
+      "derivedParameters": [],
+      "scenarioCases": [
+        {
+          "caseNr": 1,
+          "steps": [
+            {
+              "name": "a opacity slider",
+              "words": [
+                {
+                  "value": "Given",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "a opacity slider"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 102499800,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "the slider is set to",
+              "words": [
+                {
+                  "value": "When",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the slider is set to"
+                },
+                {
+                  "value": "30",
+                  "argumentInfo": {
+                    "argumentName": "wantedValue",
+                    "formattedValue": "30"
+                  }
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 4271300,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "the value is",
+              "words": [
+                {
+                  "value": "Then",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the value is"
+                },
+                {
+                  "value": "30",
+                  "argumentInfo": {
+                    "argumentName": "expectedValue",
+                    "formattedValue": "30"
+                  }
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 600800,
+              "depth": 0,
+              "parentFailed": false
+            }
+          ],
+          "explicitArguments": [],
+          "derivedArguments": [],
+          "status": "SUCCESS",
+          "durationInNanos": 123745500
+        }
+      ],
+      "casesAsTable": false,
+      "durationInNanos": 123745500
+    }
+  ],
+  "tagMap": {}
+}

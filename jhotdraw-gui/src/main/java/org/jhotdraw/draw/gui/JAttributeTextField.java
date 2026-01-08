@@ -10,7 +10,6 @@ package org.jhotdraw.draw.gui;
 import java.awt.*;
 import javax.swing.*;
 import org.jhotdraw.api.gui.AttributeEditor;
-import static org.jhotdraw.api.gui.AttributeEditor.ATTRIBUTE_VALUE_PROPERTY;
 import org.jhotdraw.gui.JLifeFormattedTextField;
 import org.jhotdraw.util.*;
 

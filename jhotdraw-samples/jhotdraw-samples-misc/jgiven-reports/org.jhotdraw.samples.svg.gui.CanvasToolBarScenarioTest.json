@@ -1,0 +1,84 @@
+{
+  "className": "org.jhotdraw.samples.svg.gui.CanvasToolBarScenarioTest",
+  "name": "Canvas Tool Bar Scenario",
+  "scenarios": [
+    {
+      "className": "org.jhotdraw.samples.svg.gui.CanvasToolBarScenarioTest",
+      "testMethodName": "canvas_toolbar_should_be_created",
+      "description": "canvas toolbar should be created",
+      "tagIds": [],
+      "explicitParameters": [],
+      "derivedParameters": [],
+      "scenarioCases": [
+        {
+          "caseNr": 1,
+          "steps": [],
+          "explicitArguments": [],
+          "derivedArguments": [],
+          "status": "SUCCESS",
+          "durationInNanos": 76447600
+        },
+        {
+          "caseNr": 2,
+          "steps": [
+            {
+              "name": "user wants to edit canvas",
+              "words": [
+                {
+                  "value": "Given",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "user wants to edit canvas"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 72910500,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "the user is in program",
+              "words": [
+                {
+                  "value": "When",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the user is in program"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 46100,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "the canvas toolbar should exist",
+              "words": [
+                {
+                  "value": "Then",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the canvas toolbar should exist"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 23800,
+              "depth": 0,
+              "parentFailed": false
+            }
+          ],
+          "explicitArguments": [],
+          "derivedArguments": [],
+          "status": "SUCCESS",
+          "durationInNanos": 84713100
+        }
+      ],
+      "casesAsTable": false,
+      "durationInNanos": 161160700
+    }
+  ],
+  "tagMap": {}
+}
