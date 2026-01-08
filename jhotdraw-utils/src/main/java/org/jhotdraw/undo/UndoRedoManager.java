@@ -63,58 +63,6 @@ public class UndoRedoManager extends UndoManager { //javax.swing.undo.UndoManage
     };
 
     /**
-     * Undo Action for use in a menu bar.
-     */
-    private class UndoAction
-            extends AbstractAction {
-
-        private static final long serialVersionUID = 1L;
-
-        public UndoAction() {
-            labels.configureAction(this, "edit.undo");
-            setEnabled(false);
-        }
-
-        /**
-         * Invoked when an action occurs.
-         */
-        @Override
-        public void actionPerformed(ActionEvent evt) {
-            try {
-                undo();
-            } catch (CannotUndoException e) {
-                System.err.println("Cannot undo: " + e);
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Redo Action for use in a menu bar.
-     */
-    private class RedoAction
-            extends AbstractAction {
-
-        private static final long serialVersionUID = 1L;
-
-        public RedoAction() {
-            labels.configureAction(this, "edit.redo");
-            setEnabled(false);
-        }
-
-        /**
-         * Invoked when an action occurs.
-         */
-        @Override
-        public void actionPerformed(ActionEvent evt) {
-            try {
-                redo();
-            } catch (CannotRedoException e) {
-                System.out.println("Cannot redo: " + e);
-            }
-        }
-    }
-    /**
      * The undo action instance.
      */
     private UndoAction undoAction;
@@ -135,15 +83,15 @@ public class UndoRedoManager extends UndoManager { //javax.swing.undo.UndoManage
      */
     public UndoRedoManager() {
         getLabels();
-        undoAction = new UndoAction();
-        redoAction = new RedoAction();
+        undoAction = new UndoAction(this);
+        redoAction = new RedoAction(this);
     }
 
     public void setLocale(Locale l) {
         labels = ResourceBundleUtil.getBundle("org.jhotdraw.undo.Labels", l);
     }
 
-    /**
+    /**RedoA
      * Discards all edits.
      */
     @Override
@@ -221,30 +169,36 @@ public class UndoRedoManager extends UndoManager { //javax.swing.undo.UndoManage
      * and of the RedoAction.
      */
     private void updateActions() {
-        String label;
         if (DEBUG) {
             System.out.println("UndoRedoManager@" + hashCode() + ".updateActions "
                     + editToBeUndone()
                     + " canUndo=" + canUndo() + " canRedo=" + canRedo());
         }
-        if (canUndo()) {
-            undoAction.setEnabled(true);
-            label = getUndoPresentationName();
+        updateUndoOrRedoAction(undoAction, labels.getString("edit.undo.text"));
+        updateUndoOrRedoAction(redoAction, labels.getString("edit.redo.text"));
+    }
+
+    /**
+     * Updates the properties of the inputted action.
+     * @author PausedMagician
+     * @param undoOrRedoAction the action that
+     * needs to be updated. (UndoAction or RedoAction)
+     * @param fallbackLabel the label that needs to be
+     * displayed in case there is no undo or redo for the updated action.
+     */
+    private void updateUndoOrRedoAction(AbstractUndoRedoAction undoOrRedoAction, String fallbackLabel) {
+        String label;
+        boolean isActionUndo = (undoOrRedoAction instanceof UndoAction);
+        boolean canUndoOrRedo = isActionUndo ? canUndo() : canRedo();
+        if (canUndoOrRedo) {
+            undoOrRedoAction.setEnabled(true);
+            label = isActionUndo ? getUndoPresentationName() : getRedoPresentationName();
         } else {
-            undoAction.setEnabled(false);
-            label = labels.getString("edit.undo.text");
+            undoOrRedoAction.setEnabled(false);
+            label = fallbackLabel;
         }
-        undoAction.putValue(Action.NAME, label);
-        undoAction.putValue(Action.SHORT_DESCRIPTION, label);
-        if (canRedo()) {
-            redoAction.setEnabled(true);
-            label = getRedoPresentationName();
-        } else {
-            redoAction.setEnabled(false);
-            label = labels.getString("edit.redo.text");
-        }
-        redoAction.putValue(Action.NAME, label);
-        redoAction.putValue(Action.SHORT_DESCRIPTION, label);
+        undoOrRedoAction.putValue(Action.NAME, label);
+        undoOrRedoAction.putValue(Action.SHORT_DESCRIPTION, label);
     }
 
     /**
@@ -275,23 +229,6 @@ public class UndoRedoManager extends UndoManager { //javax.swing.undo.UndoManage
         undoOrRedoInProgress = true;
         try {
             super.redo();
-        } finally {
-            undoOrRedoInProgress = false;
-            updateActions();
-        }
-    }
-
-    /**
-     * Undoes or redoes the last edit event.
-     * The UndoRedoManager ignores all incoming UndoableEdit events,
-     * while undo or redo is in progress.
-     */
-    @Override
-    public void undoOrRedo()
-            throws CannotUndoException, CannotRedoException {
-        undoOrRedoInProgress = true;
-        try {
-            super.undoOrRedo();
         } finally {
             undoOrRedoInProgress = false;
             updateActions();
