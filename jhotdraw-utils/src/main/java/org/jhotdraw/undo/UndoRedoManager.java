@@ -230,6 +230,14 @@ public class UndoRedoManager extends UndoManager { //javax.swing.undo.UndoManage
         updateUndoOrRedoAction(redoAction, labels.getString("edit.redo.text"));
     }
 
+    /**
+     * Updates the properties of the inputted action.
+     * @author PausedMagician
+     * @param undoOrRedoAction the action that
+     * needs to be updated. (UndoAction or RedoAction)
+     * @param fallbackLabel the label that needs to be
+     * displayed in case there is no undo or redo for the updated action.
+     */
     private void updateUndoOrRedoAction(AbstractAction undoOrRedoAction, String fallbackLabel) {
         String label;
         boolean isActionUndo = (undoOrRedoAction instanceof UndoAction);
