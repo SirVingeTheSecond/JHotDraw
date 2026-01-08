@@ -13,9 +13,6 @@ import javax.swing.*;
 import java.awt.*;
 
 public class OpacityTest {
-    static {
-        System.setProperty("java.awt.headless", "true");
-    }
 
     private CanvasToolBar canvasToolBar;
     private JFrame frame;
