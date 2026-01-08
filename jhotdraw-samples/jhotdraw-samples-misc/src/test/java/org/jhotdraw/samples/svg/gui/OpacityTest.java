@@ -57,6 +57,8 @@ public class OpacityTest {
     @After
     public void tearDown() {
         canvasToolBar.removeAll();
+        frame.removeAll();
+        frame.remove(frame);
     }
 
     @Test
