@@ -186,7 +186,7 @@ public class UndoRedoManager extends UndoManager { //javax.swing.undo.UndoManage
      * @param fallbackLabel the label that needs to be
      * displayed in case there is no undo or redo for the updated action.
      */
-    private void updateUndoOrRedoAction(AbstractAction undoOrRedoAction, String fallbackLabel) {
+    private void updateUndoOrRedoAction(AbstractUndoRedoAction undoOrRedoAction, String fallbackLabel) {
         String label;
         boolean isActionUndo = (undoOrRedoAction instanceof UndoAction);
         boolean canUndoOrRedo = isActionUndo ? canUndo() : canRedo();
