@@ -235,23 +235,6 @@ public class UndoRedoManager extends UndoManager { //javax.swing.undo.UndoManage
         }
     }
 
-    /**
-     * Undoes or redoes the last edit event.
-     * The UndoRedoManager ignores all incoming UndoableEdit events,
-     * while undo or redo is in progress.
-     */
-    @Override
-    public void undoOrRedo()
-            throws CannotUndoException, CannotRedoException {
-        undoOrRedoInProgress = true;
-        try {
-            super.undoOrRedo();
-        } finally {
-            undoOrRedoInProgress = false;
-            updateActions();
-        }
-    }
-
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         propertySupport.addPropertyChangeListener(listener);
     }
