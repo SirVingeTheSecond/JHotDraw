@@ -29,17 +29,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p> By simulating actual user interactions through the UI,
  * these tests confirm that the refactored code continues to function correctly from the
  * end user's perspective. </p>
- *
- * <p> Note: These tests are skipped in CI environments (CI=true) because
- * they require a display. They can be run locally. </p>
  */
 public class BezierToolSwingAcceptanceTest extends AssertJSwingJUnitTestCase {
 
+    // Before running a display in CI
+    /*
     @BeforeClass
     public static void skipInCI() {
         Assume.assumeTrue("Skipping Swing tests in CI (no display)",
                 System.getenv("CI") == null);
     }
+    */
 
     private FrameFixture window;
 
