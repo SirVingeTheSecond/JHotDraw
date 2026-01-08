@@ -25,6 +25,13 @@ import org.jhotdraw.util.*;
  * <p>
  * To creation of the BezierFigure can be finished by adding a segment which closes the path, or by
  * double clicking on the drawing area, or by selecting a different tool in the DrawingEditor.
+ * <p>
+ * This class has been refactored to address the following code smells:
+ * <ul>
+ *   <li>Long Parameter List - addressed via Introduce Parameter Object (BezierToolConfiguration)</li>
+ *   <li>Constructor Over-reliance - addressed via Replace Constructors with Creation Methods</li>
+ *   <li>Long Method - addressed via Compose Method / Extract Method on mousePressed</li>
+ * </ul>
  *
  * @author Werner Randelshofer
  * @version $Id$
@@ -32,65 +39,179 @@ import org.jhotdraw.util.*;
 public class BezierTool extends AbstractTool {
 
     private static final long serialVersionUID = 1L;
+
     /**
      * Set this to true to turn on debugging output on System.out.
      */
     private static final boolean DEBUG = false;
+
     private Boolean finishWhenMouseReleased;
     protected Map<AttributeKey<?>, Object> attributes;
     private boolean isToolDoneAfterCreation;
+
     /**
      * The prototype for new figures.
      */
     private BezierFigure prototype;
+
     /**
      * The created figure.
      */
     protected BezierFigure createdFigure;
     private int nodeCountBeforeDrag;
+
     /**
      * A localized name for this tool. The presentationName is displayed by the UndoableEdit.
      */
     private String presentationName;
     private Point mouseLocation;
+
     /**
      * Holds the view on which we are currently creating a figure.
      */
     private DrawingView creationView;
     private final boolean calculateFittedCurveAfterCreation;
 
+    // Factory methods (Refactoring 2: eeplace constructors with creation methods)
+
+    /**
+     * Creates a BezierTool with just a prototype figure.
+     * Uses default settings for all other parameters.
+     *
+     * @param prototype The prototype figure used to create new BezierFigures
+     * @return a new BezierTool instance
+     */
+    public static BezierTool createWithPrototype(BezierFigure prototype) {
+        BezierToolConfiguration config = new BezierToolConfiguration.Builder(prototype)
+                .build();
+        return new BezierTool(config);
+    }
+
+    /**
+     * Creates a BezierTool with a prototype and custom attributes.
+     *
+     * @param prototype The prototype figure used to create new BezierFigures
+     * @param attributes Custom attributes to apply to created figures
+     * @return a new BezierTool instance
+     */
+    public static BezierTool createWithAttributes(BezierFigure prototype,
+                                                  Map<AttributeKey<?>, Object> attributes) {
+        BezierToolConfiguration config = new BezierToolConfiguration.Builder(prototype)
+                .attributes(attributes)
+                .build();
+        return new BezierTool(config);
+    }
+
+    /**
+     * Creates a BezierTool configured for freehand drawing with curve fitting.
+     * This mode smooths the drawn path using Bezier curve fitting algorithms.
+     *
+     * @param prototype The prototype figure used to create new BezierFigures
+     * @param calculateFittedCurve true to enable curve fitting, false to preserve raw paths
+     * @return a new BezierTool instance
+     */
+    public static BezierTool createWithFittedCurves(BezierFigure prototype,
+                                                    boolean calculateFittedCurve) {
+        BezierToolConfiguration config = new BezierToolConfiguration.Builder(prototype)
+                .calculateFittedCurve(calculateFittedCurve)
+                .build();
+        return new BezierTool(config);
+    }
+
+    /**
+     * Creates a BezierTool with full configuration control.
+     * Use this when you need to specify all parameters explicitly.
+     *
+     * @param prototype The prototype figure used to create new BezierFigures
+     * @param attributes Custom attributes to apply to created figures
+     * @param presentationName Name displayed in undo operations
+     * @param calculateFittedCurve true to enable curve fitting
+     * @return a new BezierTool instance
+     */
+    public static BezierTool createFully(BezierFigure prototype,
+                                         Map<AttributeKey<?>, Object> attributes,
+                                         String presentationName,
+                                         boolean calculateFittedCurve) {
+        BezierToolConfiguration config = new BezierToolConfiguration.Builder(prototype)
+                .attributes(attributes)
+                .presentationName(presentationName)
+                .calculateFittedCurve(calculateFittedCurve)
+                .build();
+        return new BezierTool(config);
+    }
+
+    // Constructors
+
+    /**
+     * Primary constructor that accepts a configuration object.
+     * This is the preferred way to create BezierTool instances.
+     *
+     * @param config The configuration object containing all initialization parameters
+     */
+    public BezierTool(BezierToolConfiguration config) {
+        this.prototype = config.getPrototype();
+        this.attributes = config.getAttributes();
+        this.presentationName = config.getPresentationName();
+        this.calculateFittedCurveAfterCreation = config.isCalculateFittedCurveAfterCreation();
+    }
+
+    // Legacy constructors maintained to preserve backward compatibility
+
     /**
      * Creates a new instance.
+     * @deprecated Use {@link #createWithPrototype(BezierFigure)} instead
      */
+    @Deprecated
     public BezierTool(BezierFigure prototype) {
-        this(prototype, null);
+        this(new BezierToolConfiguration.Builder(prototype).build());
     }
 
+    /**
+     * @deprecated Use {@link #createWithFittedCurves(BezierFigure, boolean)} instead
+     */
+    @Deprecated
     public BezierTool(BezierFigure prototype, boolean calculateFittedCurveAfterCreation) {
-        this(prototype, null, null, calculateFittedCurveAfterCreation);
+        this(new BezierToolConfiguration.Builder(prototype)
+                .calculateFittedCurve(calculateFittedCurveAfterCreation)
+                .build());
     }
 
     /**
      * Creates a new instance.
+     * @deprecated Use {@link #createWithAttributes(BezierFigure, Map)} instead
      */
+    @Deprecated
     public BezierTool(BezierFigure prototype, Map<AttributeKey<?>, Object> attributes) {
-        this(prototype, attributes, null);
+        this(new BezierToolConfiguration.Builder(prototype)
+                .attributes(attributes)
+                .build());
     }
 
+    /**
+     * @deprecated Use {@link #createFully(BezierFigure, Map, String, boolean)} instead
+     */
+    @Deprecated
     public BezierTool(BezierFigure prototype, Map<AttributeKey<?>, Object> attributes, String name) {
-        this(prototype, attributes, null, true);
+        this(new BezierToolConfiguration.Builder(prototype)
+                .attributes(attributes)
+                .presentationName(name)
+                .build());
     }
 
-    public BezierTool(BezierFigure prototype, Map<AttributeKey<?>, Object> attributes, String name, boolean calculateFittedCurveAfterCreation) {
-        this.prototype = prototype;
-        this.attributes = attributes;
-        if (name == null) {
-            ResourceBundleUtil labels = ResourceBundleUtil.getBundle("org.jhotdraw.draw.Labels");
-            name = labels.getString("edit.createFigure.text");
-        }
-        this.presentationName = name;
-        this.calculateFittedCurveAfterCreation = calculateFittedCurveAfterCreation;
+    /**
+     * @deprecated Use {@link #createFully(BezierFigure, Map, String, boolean)} instead
+     */
+    @Deprecated
+    public BezierTool(BezierFigure prototype, Map<AttributeKey<?>, Object> attributes,
+                      String name, boolean calculateFittedCurveAfterCreation) {
+        this(new BezierToolConfiguration.Builder(prototype)
+                .attributes(attributes)
+                .presentationName(name)
+                .calculateFittedCurve(calculateFittedCurveAfterCreation)
+                .build());
     }
+
+    // Public methods
 
     public String getPresentationName() {
         return presentationName;
@@ -120,39 +241,109 @@ public class BezierTool extends AbstractTool {
         }
     }
 
+    // Handling of mouse events (Refactoring 3: Compose Method / Extract Method)
+
+    /**
+     * Handles mouse press events for creating Bezier paths.
+     *
+     * This method has been refactored using Compose Method (Kerievsky p. 123)
+     * to improve readability. The idea is that the methods should be read as a sequence of steps
+     * with implementation details in extracted helper methods.
+     */
     @Override
     public void mousePressed(MouseEvent evt) {
-        if (DEBUG) {
-            System.out.println("BezierTool.mousePressed " + evt);
+        logDebugIfEnabled("mousePressed", evt);
+
+        invalidatePreviousMouseLocation(evt);
+        mouseLocation = evt.getPoint();
+        super.mousePressed(evt);
+
+        handleViewChangeIfNeeded();
+
+        if (createdFigure == null) {
+            initializeNewFigure();
+        } else {
+            addNodeToExistingFigure(evt);
         }
+
+        nodeCountBeforeDrag = createdFigure.getNodeCount();
+    }
+
+    /**
+     * Logs debug information if debugging is enabled.
+     */
+    private void logDebugIfEnabled(String methodName, MouseEvent evt) {
+        if (DEBUG) {
+            System.out.println("BezierTool." + methodName + " " + evt);
+        }
+    }
+
+    /**
+     * Invalidates the area between the previous and current mouse locations
+     * to ensure proper repainting of the rubber band line.
+     */
+    private void invalidatePreviousMouseLocation(MouseEvent evt) {
         if (mouseLocation != null) {
             Rectangle r = new Rectangle(mouseLocation);
             r.add(evt.getPoint());
             r.grow(1, 1);
             fireAreaInvalidated(r);
         }
-        mouseLocation = evt.getPoint();
-        super.mousePressed(evt);
+    }
+
+    /**
+     * Handles the case when the user has switched to a different view
+     * while creating a figure. Finishes the current figure before
+     * starting in the new view.
+     */
+    private void handleViewChangeIfNeeded() {
         if (createdFigure != null && creationView != getView()) {
             finishCreation(createdFigure, creationView);
             createdFigure = null;
         }
-        if (createdFigure == null) {
-            creationView = getView();
-            creationView.clearSelection();
-            finishWhenMouseReleased = null;
-            createdFigure = createFigure();
-            createdFigure.addNode(new BezierPath.Node(
-                    creationView.getConstrainer() == null ? creationView.viewToDrawing(anchor)
-                    : creationView.getConstrainer().constrainPoint(creationView.viewToDrawing(anchor), createdFigure)));
-            getDrawing().add(createdFigure);
-        } else {
-            if (evt.getClickCount() == 1) {
-                addPointToFigure(creationView.getConstrainer() == null ? creationView.viewToDrawing(anchor)
-                        : creationView.getConstrainer().constrainPoint(creationView.viewToDrawing(anchor), createdFigure));
-            }
+    }
+
+    /**
+     * Initializes a new figure when the user starts drawing.
+     * Sets up the creation view, creates the figure from the prototype,
+     * adds the first node, and adds the figure to the drawing.
+     */
+    private void initializeNewFigure() {
+        creationView = getView();
+        creationView.clearSelection();
+        finishWhenMouseReleased = null;
+
+        createdFigure = createFigure();
+        Point2D.Double constrainedPoint = getConstrainedPoint();
+        createdFigure.addNode(new BezierPath.Node(constrainedPoint));
+        getDrawing().add(createdFigure);
+    }
+
+    /**
+     * Adds a node to the existing figure being created.
+     * Only adds on single clicks to avoid duplicate nodes from double-clicks.
+     */
+    private void addNodeToExistingFigure(MouseEvent evt) {
+        if (evt.getClickCount() == 1) {
+            Point2D.Double constrainedPoint = getConstrainedPoint();
+            addPointToFigure(constrainedPoint);
         }
-        nodeCountBeforeDrag = createdFigure.getNodeCount();
+    }
+
+    /**
+     * Gets the current anchor point, applying any active constrainer
+     * (such as grid snapping) if one is configured.
+     *
+     * @return the constrained point in drawing coordinates
+     */
+    private Point2D.Double getConstrainedPoint() {
+        Point2D.Double viewPoint = creationView.viewToDrawing(anchor);
+
+        if (creationView.getConstrainer() == null) {
+            return viewPoint;
+        }
+
+        return creationView.getConstrainer().constrainPoint(viewPoint, createdFigure);
     }
 
     @SuppressWarnings("unchecked")
@@ -199,26 +390,42 @@ public class BezierTool extends AbstractTool {
         if (createdFigure != null) {
             switch (evt.getClickCount()) {
                 case 1:
-                    if (createdFigure.getNodeCount() > 2) {
-                        Rectangle r = new Rectangle(getView().drawingToView(createdFigure.getStartPoint()));
-                        r.grow(2, 2);
-                        if (r.contains(evt.getX(), evt.getY())) {
-                            createdFigure.setClosed(true);
-                            finishCreation(createdFigure, creationView);
-                            createdFigure = null;
-                            if (isToolDoneAfterCreation) {
-                                fireToolDone();
-                            }
-                        }
-                    }
+                    handleSingleClick(evt);
                     break;
                 case 2:
-                    finishWhenMouseReleased = null;
-                    finishCreation(createdFigure, creationView);
-                    createdFigure = null;
+                    handleDoubleClick();
                     break;
             }
         }
+    }
+
+    /**
+     * Handles single click events.
+     * Checks if the click is near the start point to close the path.
+     */
+    private void handleSingleClick(MouseEvent evt) {
+        if (createdFigure.getNodeCount() > 2) {
+            Rectangle r = new Rectangle(getView().drawingToView(createdFigure.getStartPoint()));
+            r.grow(2, 2);
+            if (r.contains(evt.getX(), evt.getY())) {
+                createdFigure.setClosed(true);
+                finishCreation(createdFigure, creationView);
+                createdFigure = null;
+                if (isToolDoneAfterCreation) {
+                    fireToolDone();
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles double click events.
+     * Finishes the current figure creation.
+     */
+    private void handleDoubleClick() {
+        finishWhenMouseReleased = null;
+        finishCreation(createdFigure, creationView);
+        createdFigure = null;
     }
 
     protected void fireUndoEvent(Figure createdFigure, DrawingView creationView) {
@@ -251,10 +458,26 @@ public class BezierTool extends AbstractTool {
 
     @Override
     public void mouseReleased(MouseEvent evt) {
-        if (DEBUG) {
-            System.out.println("BezierTool.mouseReleased " + evt);
-        }
+        logDebugIfEnabled("mouseReleased", evt);
+
         isWorking = false;
+
+        applyCurveFittingIfNeeded();
+
+        if (shouldFinishOnRelease()) {
+            finishFigureOnRelease(evt);
+            return;
+        }
+
+        updateFinishState();
+        repaintRubberBand(evt);
+    }
+
+    /**
+     * Applies Bezier curve fitting to the digitized path if enabled
+     * and if enough points were added during the drag operation.
+     */
+    private void applyCurveFittingIfNeeded() {
         if (createdFigure.getNodeCount() > nodeCountBeforeDrag + 1) {
             createdFigure.willChange();
             BezierPath figurePath = createdFigure.getBezierPath();
@@ -264,26 +487,45 @@ public class BezierTool extends AbstractTool {
                 figurePath.remove(nodeCountBeforeDrag - 1);
             }
             BezierPath fittedPath = calculateFittedCurve(digitizedPath);
-            //figurePath.addPolyline(digitizedPath);
             figurePath.addAll(fittedPath);
             createdFigure.setBezierPath(figurePath);
             createdFigure.changed();
             nodeCountBeforeDrag = createdFigure.getNodeCount();
         }
-        if (finishWhenMouseReleased == Boolean.TRUE) {
-            if (createdFigure.getNodeCount() > 1) {
-                Rectangle r = new Rectangle(anchor.x, anchor.y, 0, 0);
-                r.add(evt.getX(), evt.getY());
-                maybeFireBoundsInvalidated(r);
-                finishCreation(createdFigure, creationView);
-                createdFigure = null;
-                finishWhenMouseReleased = null;
-                return;
-            }
-        } else if (finishWhenMouseReleased == null) {
+    }
+
+    /**
+     * Determines if the figure should be finished when the mouse is released.
+     */
+    private boolean shouldFinishOnRelease() {
+        return finishWhenMouseReleased == Boolean.TRUE && createdFigure.getNodeCount() > 1;
+    }
+
+    /**
+     * Finishes figure creation on mouse release.
+     */
+    private void finishFigureOnRelease(MouseEvent evt) {
+        Rectangle r = new Rectangle(anchor.x, anchor.y, 0, 0);
+        r.add(evt.getX(), evt.getY());
+        maybeFireBoundsInvalidated(r);
+        finishCreation(createdFigure, creationView);
+        createdFigure = null;
+        finishWhenMouseReleased = null;
+    }
+
+    /**
+     * Updates the finish state flag for subsequent mouse releases.
+     */
+    private void updateFinishState() {
+        if (finishWhenMouseReleased == null) {
             finishWhenMouseReleased = Boolean.FALSE;
         }
-        // repaint dotted line
+    }
+
+    /**
+     * Repaints the rubber band line connecting the anchor to the mouse position.
+     */
+    private void repaintRubberBand(MouseEvent evt) {
         Rectangle r = new Rectangle(anchor);
         r.add(mouseLocation);
         r.add(evt.getPoint());

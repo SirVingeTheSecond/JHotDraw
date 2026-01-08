@@ -85,6 +85,7 @@ public class ToolsToolBar extends AbstractToolBar {
                         createSelectionActions(editor));
                 btn.setUI((PaletteButtonUI) PaletteButtonUI.createUI(btn));
                 btn.addMouseListener(new SelectionToolButtonHandler(editor));
+                btn.setName("selectionTool");
                 gbc = new GridBagConstraints();
                 gbc.gridx = 0;
                 gbc.gridy = 0;
@@ -94,6 +95,7 @@ public class ToolsToolBar extends AbstractToolBar {
                 btn = ButtonFactory.addToolTo(this, editor, creationTool = new CreationTool(new SVGRectFigure(), attributes), "createRectangle", labels);
                 creationTool.setToolDoneAfterCreation(false);
                 btn.setUI((PaletteButtonUI) PaletteButtonUI.createUI(btn));
+                btn.setName("createRectangle");
                 gbc = new GridBagConstraints();
                 gbc.gridx = 0;
                 gbc.gridy = 1;
@@ -102,6 +104,7 @@ public class ToolsToolBar extends AbstractToolBar {
                 btn = ButtonFactory.addToolTo(this, editor, creationTool = new CreationTool(new SVGEllipseFigure(), attributes), "createEllipse", labels);
                 creationTool.setToolDoneAfterCreation(false);
                 btn.setUI((PaletteButtonUI) PaletteButtonUI.createUI(btn));
+                btn.setName("createEllipse");
                 gbc = new GridBagConstraints();
                 gbc.gridx = 1;
                 gbc.gridy = 1;
@@ -110,6 +113,7 @@ public class ToolsToolBar extends AbstractToolBar {
                 btn = ButtonFactory.addToolTo(this, editor, pathTool = new PathTool(new SVGPathFigure(), new SVGBezierFigure(true), attributes), "createPolygon", labels);
                 pathTool.setToolDoneAfterCreation(false);
                 btn.setUI((PaletteButtonUI) PaletteButtonUI.createUI(btn));
+                btn.setName("createPolygon");
                 gbc = new GridBagConstraints();
                 gbc.gridx = 2;
                 gbc.gridy = 1;
@@ -121,6 +125,7 @@ public class ToolsToolBar extends AbstractToolBar {
                 btn = ButtonFactory.addToolTo(this, editor, creationTool = new CreationTool(new SVGPathFigure(), attributes), "createLine", labels);
                 creationTool.setToolDoneAfterCreation(false);
                 btn.setUI((PaletteButtonUI) PaletteButtonUI.createUI(btn));
+                btn.setName("createLine");
                 gbc = new GridBagConstraints();
                 gbc.gridx = 1;
                 gbc.gridy = 0;
@@ -129,6 +134,7 @@ public class ToolsToolBar extends AbstractToolBar {
                 btn = ButtonFactory.addToolTo(this, editor, pathTool = new PathTool(new SVGPathFigure(), new SVGBezierFigure(false), attributes), "createScribble", labels);
                 pathTool.setToolDoneAfterCreation(false);
                 btn.setUI((PaletteButtonUI) PaletteButtonUI.createUI(btn));
+                btn.setName("createScribble");
                 gbc = new GridBagConstraints();
                 gbc.gridx = 2;
                 gbc.gridy = 0;
@@ -140,6 +146,7 @@ public class ToolsToolBar extends AbstractToolBar {
                 btn = ButtonFactory.addToolTo(this, editor, textTool = new TextCreationTool(new SVGTextFigure(), attributes), "createText", labels);
                 textTool.setToolDoneAfterCreation(true);
                 btn.setUI((PaletteButtonUI) PaletteButtonUI.createUI(btn));
+                btn.setName("createText");
                 gbc = new GridBagConstraints();
                 gbc.gridx = 0;
                 gbc.gridy = 2;
@@ -150,6 +157,7 @@ public class ToolsToolBar extends AbstractToolBar {
                 textAreaTool.setToolDoneAfterCreation(true);
                 btn = ButtonFactory.addToolTo(this, editor, textAreaTool, "createTextArea", labels);
                 btn.setUI((PaletteButtonUI) PaletteButtonUI.createUI(btn));
+                btn.setName("createTextArea");
                 gbc = new GridBagConstraints();
                 gbc.gridx = 1;
                 gbc.gridy = 2;
@@ -162,12 +170,13 @@ public class ToolsToolBar extends AbstractToolBar {
                 imageTool.setToolDoneAfterCreation(true);
                 imageTool.setUseFileDialog(true);
                 btn.setUI((PaletteButtonUI) PaletteButtonUI.createUI(btn));
+                btn.setName("createImage");
                 gbc = new GridBagConstraints();
                 gbc.gridx = 2;
                 gbc.gridy = 2;
                 gbc.insets = new Insets(3, 3, 0, 0);
                 p.add(btn, gbc);
-            break;
+                break;
         }
         return p;
     }
