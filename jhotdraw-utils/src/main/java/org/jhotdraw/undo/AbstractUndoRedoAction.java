@@ -1,6 +1,7 @@
 package org.jhotdraw.undo;
 
 import javax.swing.*;
+import java.util.logging.Logger;
 
 public abstract class AbstractUndoRedoAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
@@ -13,4 +14,7 @@ public abstract class AbstractUndoRedoAction extends AbstractAction {
     }
 
     protected UndoRedoManager getUndoRedoManager() {return undoRedoManager;}
+    protected Logger getLogger() {
+        return Logger.getLogger(this.getClass().getName());
+    }
 }
