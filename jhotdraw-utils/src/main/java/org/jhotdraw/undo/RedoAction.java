@@ -7,15 +7,9 @@ import java.awt.event.ActionEvent;
 /**
  * Redo Action for use in a menu bar.
  */
-class RedoAction extends AbstractAction {
-
-    private static final long serialVersionUID = 1L;
-    private final UndoRedoManager undoRedoManager;
-
+class RedoAction extends AbstractUndoRedoAction {
     public RedoAction(UndoRedoManager undoRedoManager) {
-        this.undoRedoManager = undoRedoManager;
-        UndoRedoManager.getLabels().configureAction(this, "edit.redo");
-        setEnabled(false);
+        super(undoRedoManager, "redo");
     }
 
     /**
@@ -24,7 +18,7 @@ class RedoAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent evt) {
         try {
-            this.undoRedoManager.redo();
+            getUndoRedoManager().redo();
         } catch (CannotRedoException e) {
             System.out.println("Cannot redo: " + e);
         }
