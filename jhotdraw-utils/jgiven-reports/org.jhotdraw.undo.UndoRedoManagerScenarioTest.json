@@ -1,0 +1,230 @@
+{
+  "className": "org.jhotdraw.undo.UndoRedoManagerScenarioTest",
+  "name": "Undo Redo Manager Scenario",
+  "scenarios": [
+    {
+      "className": "org.jhotdraw.undo.UndoRedoManagerScenarioTest",
+      "testMethodName": "undo_returns_to_previous_state",
+      "description": "undo returns to previous state",
+      "tagIds": [],
+      "explicitParameters": [],
+      "derivedParameters": [],
+      "scenarioCases": [
+        {
+          "caseNr": 1,
+          "steps": [
+            {
+              "name": "the user has made at least one edit",
+              "words": [
+                {
+                  "value": "Given",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the user has made at least one edit"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 407980827,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "the user presses undo",
+              "words": [
+                {
+                  "value": "When",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the user presses undo"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 172361,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "the drawing should return to the previous state",
+              "words": [
+                {
+                  "value": "Then",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the drawing should return to the previous state"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 39348,
+              "depth": 0,
+              "parentFailed": false
+            }
+          ],
+          "explicitArguments": [],
+          "derivedArguments": [],
+          "status": "SUCCESS",
+          "durationInNanos": 417360137
+        }
+      ],
+      "casesAsTable": false,
+      "durationInNanos": 417360137
+    },
+    {
+      "className": "org.jhotdraw.undo.UndoRedoManagerScenarioTest",
+      "testMethodName": "undo_throws_an_error",
+      "description": "undo throws an error",
+      "tagIds": [],
+      "explicitParameters": [],
+      "derivedParameters": [],
+      "scenarioCases": [
+        {
+          "caseNr": 1,
+          "steps": [
+            {
+              "name": "no edits have been made",
+              "words": [
+                {
+                  "value": "Given",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "no edits have been made"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 253998,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "the user presses undo",
+              "words": [
+                {
+                  "value": "When",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the user presses undo"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 66008,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "the program throws the corrosponding error",
+              "words": [
+                {
+                  "value": "Then",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the program throws the corrosponding error"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 28759,
+              "depth": 0,
+              "parentFailed": false
+            }
+          ],
+          "explicitArguments": [],
+          "derivedArguments": [],
+          "status": "SUCCESS",
+          "durationInNanos": 719422
+        }
+      ],
+      "casesAsTable": false,
+      "durationInNanos": 719422
+    },
+    {
+      "className": "org.jhotdraw.undo.UndoRedoManagerScenarioTest",
+      "testMethodName": "redo_returns_to_state_before_undo",
+      "description": "redo returns to state before undo",
+      "tagIds": [],
+      "explicitParameters": [],
+      "derivedParameters": [],
+      "scenarioCases": [
+        {
+          "caseNr": 1,
+          "steps": [
+            {
+              "name": "the user has made at least one edit",
+              "words": [
+                {
+                  "value": "Given",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the user has made at least one edit"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 232202,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "the user has pressed undo",
+              "words": [
+                {
+                  "value": "and",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the user has pressed undo"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 64879,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "the user presses redo",
+              "words": [
+                {
+                  "value": "When",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the user presses redo"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 51202,
+              "depth": 0,
+              "parentFailed": false
+            },
+            {
+              "name": "the state should return to before the undo",
+              "words": [
+                {
+                  "value": "Then",
+                  "isIntroWord": true
+                },
+                {
+                  "value": "the state should return to before the undo"
+                }
+              ],
+              "status": "PASSED",
+              "durationInNanos": 27137,
+              "depth": 0,
+              "parentFailed": false
+            }
+          ],
+          "explicitArguments": [],
+          "derivedArguments": [],
+          "status": "SUCCESS",
+          "durationInNanos": 3652112
+        }
+      ],
+      "casesAsTable": false,
+      "durationInNanos": 3652112
+    }
+  ],
+  "tagMap": {}
+}
